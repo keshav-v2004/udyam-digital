@@ -1,0 +1,193 @@
+// Prisma Schema for Accel Business — Udyam Digital
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Product {
+  id                    String   @id // P01, P02...
+  category              String   // Connectivity, Communication, Cloud & Productivity, Security, IoT & Physical
+  name                  String
+  description           String
+  unit                  String   // per site, per line, per channel, etc.
+  priceMinInrPerMonth   Int
+  priceMaxInrPerMonth   Int
+  oneTimeSetupInr       Int
+  minContractMonths     Int
+  availableCityTiers    String   // "1;2" or "1"
+  minEmployees          Int
+  minSites              Int
+  requiresGstin         Boolean  // true if requires_gstin == 'Y'
+  requiresOneOf         String?  // P01|P02...
+  typicalInstallDays    Int
+  targetSegments        String   // micro;prof;multi;mfg
+  createdAt             DateTime @default(now())
+}
+
+model SmbLead {
+  leadId                String   @id // L00001
+  createdDate           String
+  leadSource            String
+  businessName          String
+  businessType          String
+  segment               String
+  city                  String
+  cityTier              Int
+  state                 String
+  preferredLanguage     String
+  employeeCount         Int
+  numSites              Int
+  annualTurnoverBand    String
+  hasGstin              String
+  gstin                 String?
+  hasUdyam              String
+  udyamNumber           String?
+  currentInternet       String?
+  currentProvider       String?
+  monthlySpendInr       Int?
+  productsOfInterest    String?
+  contactName           String
+  contactRole           String
+  stageReached          String
+  outcome               String
+  dropReason            String?
+  contactedDate         String?
+  needsAssessedDate     String?
+  quoteAcceptedDate     String?
+  kycCompleteDate       String?
+  activatedDate         String?
+  daysLeadToActivation  Int?
+  customerFollowUpCalls Int?
+  bundleProducts        String?
+  monthlyBundleValueInr Int?
+  oneTimeSetupInr       Int?
+  contractMonths        Int?
+  churnedWithin6Months  String?
+  npsScore              Int?
+  acquisitionCostInr    Int
+}
+
+model GstinRecord {
+  gstin                     String   @id
+  legalName                 String
+  tradeName                 String
+  constitution              String
+  principalPlaceOfBusiness  String
+  state                     String
+  registrationDate          String
+  status                    String   // Active, Suspended, etc.
+}
+
+model UdyamRecord {
+  udyamNumber        String   @id
+  enterpriseName     String
+  enterpriseType     String   // Micro, Small, Medium
+  majorActivity      String   // Services, Trading, Manufacturing
+  nicDescription     String
+  state              String
+  city               String
+  dateOfRegistration String
+}
+
+model ConsentRecord {
+  id                   String   @id @default(cuid())
+  quoteId              String?
+  orderId              String?
+  noticeVersion        String   @default("v2.1-2026")
+  purposes             String   // JSON string of consented purpose flags
+  identityVerification Boolean  @default(false)
+  documentProcessing   Boolean  @default(false)
+  orderFulfillment     Boolean  @default(false)
+  marketingAllowed     Boolean  @default(false)
+  withdrawn            Boolean  @default(false)
+  withdrawnAt          DateTime?
+  ipAddressMasked      String?
+  timestamp            DateTime @default(now())
+}
+
+model KycVerification {
+  id                 String   @id @default(cuid())
+  quoteId            String?
+  orderId            String?
+  applicantName      String?
+  businessName       String?
+  gstin              String?
+  gstinStatus        String?  // Verified, Mismatch, Not Found, Invalid
+  gstinMessage       String?
+  udyamNumber        String?
+  udyamStatus        String?  // Verified, Mismatch, Not Found, Invalid
+  udyamMessage       String?
+  addressProofType   String?
+  addressProofStatus String?
+  signatoryStatus    String?
+  overallStatus      String   @default("PENDING") // PENDING, VERIFIED, MANUAL_REVIEW, REJECTED
+  issuesJson         String?  // JSON array of detected red flags / mismatches
+  extractedDataJson  String?  // JSON of OCR-extracted fields
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model SavedQuote {
+  id                String   @id // QUOTE-XXXXX
+  businessName      String
+  contactName       String
+  contactPhone      String
+  contactEmail      String?
+  businessType      String
+  segment           String
+  city              String
+  cityTier          Int
+  state             String
+  pinCode           String?
+  itemsJson         String   // JSON array of selected items with prices & quantities
+  monthlyRecurring  Int
+  oneTimeCharges    Int
+  discountInr       Int      @default(0)
+  taxInr            Int      @default(0)
+  netMonthlyInr     Int
+  contractMonths    Int
+  notes             String?
+  createdAt         DateTime @default(now())
+  orders            Order[]
+}
+
+model Order {
+  id                  String   @id // ORD-YYYYMM-XXXX
+  quoteId             String
+  quote               SavedQuote @relation(fields: [quoteId], references: [id])
+  businessName        String
+  contactName         String
+  contactPhone        String
+  serviceAddress      String
+  status              String   @default("APPLICATION_RECEIVED")
+  // APPLICATION_RECEIVED -> KYC_PROCESSING -> KYC_VERIFIED -> ORDER_CONFIRMED -> INSTALLATION_SCHEDULED -> INSTALLATION_IN_PROGRESS -> ACTIVATED
+  // Also: ACTION_REQUIRED, MANUAL_REVIEW, CANCELLED
+  scheduledInstallDate String?
+  completedInstallDate String?
+  assignedPartnerId    String?
+  assignedAgentId      String?
+  notes               String?
+  historyJson         String   // JSON array of status history entries with timestamp and actor
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model PartnerReferral {
+  id            String   @id @default(cuid())
+  partnerId     String   // e.g., PRT-DEL-01
+  partnerName   String
+  businessName  String
+  contactName   String
+  contactPhone  String
+  city          String
+  status        String   // REFERRED, CONTACTED, QUOTED, KYC_COMPLETE, ACTIVATED
+  commissionInr Int      @default(0)
+  quoteId       String?
+  orderId       String?
+  createdAt     DateTime @default(now())
+}

@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="public/next.svg" alt="Accel Business" width="60" />
-
 # Accel Business — Udyam Digital
 
 **India's first end-to-end digital acquisition platform for MSME telecom bundles.**
@@ -18,323 +16,263 @@ A full-stack Next.js application that takes an SMB owner from *"I need internet"
 
 ---
 
-## The Problem It Solves
+## 🏗️ System Architecture & Workflow Diagram
 
-India has **63 million MSMEs**. Most of them still:
 
-- Call a helpline and wait 3 days for a quote.
-- Submit physical KYC documents at a store.
-- Track their order via phone call to a customer care agent.
+> **Core Architecture Flowchart:** Complete end-to-end component flow from multi-persona ingestion to the deterministic recommendation engine, LLM augmentation layer, Smart KYC cross-registry verification, and field force dispatch.
 
-**Accel Business Udyam Digital** collapses that entire journey — advisory, quotation, KYC verification, ordering, and installation tracking — into a single, bilingual, mobile-first web application.
+<div align="center">
 
----
+### 📌 System Architecture Flowchart
+![System Architecture Flowchart](assets/flowchart.png)
 
-## Application Pages & Features
+*Figure 1: Full System Architecture & Data Flow — User Personas, Presentation Tier, Secure Next.js Route Handlers, Deterministic Engine, SQLite/Prisma Persistence, and Mock Government Registries.*
 
-### 1. 🏠 Landing Page — `/`
-
-The storefront. Presents the product proposition clearly to an MSME owner who lands from a campaign link or QR code.
-
-> **Screenshot placeholder** — `docs/screenshots/homepage.png`
-
-**Key elements:**
-- **Hero section** with a primary CTA routing to the AI Advisor.
-- **Industry Sector Grid** — 6 pre-configured bundle categories with starting prices:
-
-  | Sector | Bundle Name | Starting From |
-  |:---|:---|---:|
-  | Retail & Kirana | Retail Connect | ₹1,598/mo |
-  | Clinics & Healthcare | Clinic Connect | ₹4,897/mo |
-  | Education & Coaching | Education Connect | ₹3,498/mo |
-  | Restaurants & Cafes | Restaurant Connect | ₹2,697/mo |
-  | Small Manufacturing | Manufacturer Connect | ₹11,998/mo |
-  | Professional Offices | Professional Connect | ₹3,897/mo |
-
-- **Traditional vs Digital** comparison section showing time, cost, and effort saved.
-- **Language switcher** — full English / हिन्दी toggle, persisted across the session.
-- Sticky responsive header with navigation to all app sections.
+</div>
 
 ---
 
-### 2. 🤖 AI Business Advisor — `/advisor`
+## 🌐 Landing Page (Bilingual: English & Hindi)
 
-The heart of the application. A **6-step guided wizard** that understands the customer's business and builds a customized product bundle — entirely on the local deterministic engine, with optional Gemini AI enhancements.
+The storefront presents the product proposition clearly to an MSME owner who lands from a campaign link or QR code. Features tailored MSME categories, instant CTA, live value counters, and dual-language localization.
 
-> **Screenshot placeholder** — `docs/screenshots/advisor-wizard.png`
+| English Landing Page | Hindi Landing Page (पूर्ण हिन्दी अनुवाद) |
+| :---: | :---: |
+| ![Landing Page - English](assets/image.png) | ![Landing Page - Hindi](assets/image%20copy.png) |
+| *Hero, Value Props & Sector Portfolios* | *संपूर्ण हिन्दी अनुवाद एवं व्यापारिक श्रेणियां* |
 
-> **Screenshot placeholder** — `docs/screenshots/advisor-result.png`
+<div align="center">
 
-**Step-by-step flow:**
+![Sector Portfolios & Comparisons](assets/image%20copy%202.png)  
+*Figure 2: Sector Bundles Showcase & Comparison of Traditional 17.6-Day Process vs. Accel Digital Model*
 
-| Step | What it asks |
-|:---|:---|
-| 1 | Business type (Retail, Clinic, Restaurant, Factory, Office…) |
-| 2 | City & location tier (Metro / Tier-2) |
-| 3 | Employee headcount & number of office branches |
-| 4 | Internet need (Basic / High-speed / Dedicated SLA / No Fibre available) |
-| 5 | Required digital tools (POS, CCTV, Cloud Email, Backup, Endpoint Security) |
-| 6 | Communication needs (Postpaid SIMs, SIP IVR, WhatsApp API, SMS Marketing) |
-
-**What the engine does behind the scenes:**
-
-- Selects the right connectivity tier (Biz Fibre 100 / 300 / 1G / AirFiber 5G / Leased Line) based on employees + SLA requirements.
-- Adds SD-WAN orchestration for multi-site businesses.
-- Triggers cellular failover for manufacturers and multi-branch setups.
-- Recommends POS terminals for retail, SIP trunks for clinics, IoT machine monitoring for factories.
-- Calculates exact monthly recurring charges, one-time setup fees, installation SLA timelines, and minimum contract terms.
-- Presents a **named, branded bundle** (e.g., *"Clinic Connect"*) with a primary products list and opt-in add-ons.
-
-**AI Features (optional, requires `GEMINI_API_KEY`):**
-
-- **✨ AI Smart Fill** — Type a natural language description of your business in the Step 1 search box (e.g., *"3-floor diagnostic lab in Lucknow, 10 staff, need CCTV, fast Wi-Fi and WhatsApp billing"*). Gemini parses it and auto-fills all 6 form steps instantly.
-- **✨ Explain with Gemini AI** — On the result screen, a button requests a Gemini-generated 2-paragraph executive sales pitch tailored to that specific business, replacing the local template rationale.
-- Without a key, both features degrade gracefully — the app functions identically using the local engine.
-
-**Bundle result screen shows:**
-- Bundle name, tagline, and segment classification.
-- Primary products (mandatory core) with individual pricing and engineer-written rationale per product.
-- Recommended add-ons the customer can enable.
-- Total monthly recurring, one-time setup cost, estimated installation days, and contract term.
-- Rationale badge showing `Local Engine` or `Gemini AI` depending on how the explanation was generated.
+</div>
 
 ---
 
-### 3. 📋 Quote Studio — `/quote`
+## 💡 The Problem It Solves
 
-A live, interactive commercial configuration tool. Think of it as a shopping cart built specifically for telecom bundles — with business-grade commercial rules.
+India has **63 million MSMEs**. Real analysis of our dataset containing **5,000 MSME leads** revealed significant operational friction:
 
-> **Screenshot placeholder** — `docs/screenshots/quote-studio.png`
+- **17.6-day activation cycle:** Customers wait over two weeks and make **3+ follow-up chase calls** due to opaque progress tracking.
+- **Fragmented vendors:** Businesses manage separate bills and customer care numbers for broadband, CCTV, POS, and mobile SIMs.
+- **Paperwork fatigue:** **273 leads dropped** at the quote stage because of lengthy manual paperwork and confusing fee structures.
+- **High blended CAC:** Customer acquisition costs average **₹15,000 per activated customer** under field-heavy visits.
 
-**Features:**
-- **Auto-loads** the bundle from the Advisor via `localStorage` — the customer never re-enters data.
-- **Customer & service location fields** — Business name, authorized contact, mobile, city, state, PIN code.
-- **Line-item management** — Each product shows category, unit, monthly price, setup fee, and quantity controls (+/−). Mandatory core products are locked from deletion.
-- **Quick add-on toggles** — Cloud CCTV, Cloud Backup, Static IP, Endpoint Security shown as one-click additions.
-- **Live price recalculation** on every change:
-  - Monthly recurring subtotal
-  - Bundle commitment discount (10% for 12-month / 15% for 24-month contract)
-  - 18% GST (fully input-credit eligible for GSTIN holders)
-  - One-time setup charges
-  - **Net total monthly bill (incl. GST)**
-- **Contract term selector** — 12-month vs 24-month with real-time discount switching.
-- Saves the finalized quote to the SQLite database (`SavedQuote` model) and redirects to KYC with the `quoteId`.
+**Accel Business Udyam Digital** collapses that entire journey — advisory, quotation, KYC verification, ordering, and installation tracking — into a single, bilingual, mobile-first web application, reducing activation time from **17.6 days to under 5 days** and targeting **≥30% conversion**.
 
 ---
 
-### 4. 🛡️ Smart Digital KYC — `/kyc`
-
-A **4-step paperless onboarding engine** that replaces the traditional physical document submission process for telecom activations.
-
-> **Screenshot placeholder** — `docs/screenshots/kyc-consent.png`
-
-> **Screenshot placeholder** — `docs/screenshots/kyc-result.png`
-
-**Step 1 — Privacy & Consent Notice (DOT-compliant)**
-
-Presents a structured, legally accurate notice covering:
-- Purpose of data collection (identity verification, OCR processing, order fulfillment, marketing — opt-in only).
-- Data retention policy (90-day purge for inactive applicants).
-- Right to withdraw consent at any time.
-
-Three mandatory consents (identity, document processing, fulfillment) and one optional (marketing). Cannot proceed without the mandatory three.
-
-**Step 2 — KYC Dossier / Document Selection**
-
-A **12-specimen test dataset** (K01–K12) for demonstration and hackathon testing, covering intentionally varied scenarios:
-
-- ✅ Clean, fully verified businesses
-- ⚠️ GSTIN suspended / address proof expired / name mismatch
-- ❌ Completely invalid documents (rejected outcome)
-
-Each specimen card shows business name, expected outcome badge (Verified / Manual Review / Rejected), and partial GSTIN for identification.
-
-**Step 3 — OCR Field Review**
-
-Simulates Tesseract.js-powered document OCR extraction. Fields auto-populated from the specimen (or real uploaded file):
-- Legal Business Name
-- 15-digit GSTIN
-- Udyam Registration Number (`UDYAM-XX-00-XXXXXXX` format)
-- Authorized Signatory Name
-- Address Proof Utility Bill Date
-
-Customer can edit any field before submitting for verification — matching how a real OCR correction flow works.
-
-**Step 4 — Cross-Registry Verification Result**
-
-Runs the extracted data through three independent checks simultaneously:
-
-| Check | Data Source | What it validates |
-|:---|:---|:---|
-| GST Portal Match | `GstinRecord` DB table | GSTIN format, Active status, registered trade name |
-| Udyam MSME Match | `UdyamRecord` DB table | Enterprise name, type (Micro/Small), NIC classification |
-| Address Proof Recency | Date arithmetic | Utility bill issued within 90 days of reference date |
-
-Outputs one of three final verdicts:
-- **✅ Instant Digital KYC Verified** — Proceeds to order confirmation
-- **⚠️ Manual Review Required** — Submits for field-assisted desk review
-- **❌ Application Rejected** — Blocks automatic onboarding, shows specific flags
-
-Flagged issues displayed clearly (e.g., *"GSTIN suspended by tax authority"*, *"Address proof older than 90 days"*, *"Signatory name does not match GSTIN records"*).
-
-Saves a `KycVerification` record and a `ConsentRecord` with a unique consent reference ID to the database.
-
----
-
-### 5. 📦 Order Tracker — `/tracker`
-
-A real-time order status page that keeps the customer informed from submission to live service activation.
-
-> **Screenshot placeholder** — `docs/screenshots/order-tracker.png`
-
-**Features:**
-- Loads order details from the database by `orderId` URL parameter.
-- **7-stage visual progress pipeline** with timestamps and descriptions:
-  1. Application Received
-  2. KYC Processing
-  3. KYC Verified
-  4. Order Confirmed
-  5. Installation Scheduled
-  6. Installation in Progress
-  7. **Activated** ✅
-
-- Completed stages shown in emerald green with timestamps, current stage highlighted in rose, pending stages in slate.
-- **Stage simulator button** — advances the order through stages live (for demo purposes), updating the database.
-- Shows assigned field engineer name and scheduled installation date when available.
-- Contact support section at the bottom.
-- Fully bilingual — all stage labels and descriptions in English and Hindi.
-
----
-
-### 6. 🤝 Partner Portal — `/partner`
-
-A referral management console for Accel Business distribution partners (ISPs, IT resellers, Authorized retailers).
-
-> **Screenshot placeholder** — `docs/screenshots/partner-portal.png`
-
-**Features:**
-- **Role switcher** — Partner / Sales Executive / Admin views.
-- **Referral submission form** (modal) — Business name, contact, phone, city.
-- **Referrals pipeline table** — All submitted leads with status badges:
-  `REFERRED → CONTACTED → QUOTED → KYC_COMPLETE → ACTIVATED`
-- **Commission tracking** — INR commission per activated referral shown per row.
-- **Summary stats cards** — Total referrals, Activated count, Pending, Total commission earned.
-- Saves new referrals to `PartnerReferral` database table.
-
----
-
-### 7. 📊 Admin Analytics Dashboard — `/admin`
-
-A data analytics view built on 5,000 synthetic-but-realistic MSME lead records from the Q1 2026 cohort.
-
-> **Screenshot placeholder** — `docs/screenshots/admin-analytics.png`
-
-**Metrics & Charts:**
-
-| Widget | What it shows |
-|:---|:---|
-| KPI Cards | Total leads, Activated count, Conversion rate, Avg. monthly bundle value |
-| Bar Chart | Leads by business segment (Retail, Clinic, Education, Restaurant, Manufacturing, Professional) |
-| Pie Chart | Lead outcome distribution (Activated, Quoted, Dropped, KYC Review) |
-| Bar Chart | Avg. days from lead to activation by segment |
-| Data Table | Top 10 lead records with stage, bundle value, and churn flag |
-
-Built using **Recharts** with responsive containers. Uses the `/api/analytics` route that aggregates the `SmbLead` table.
-
----
-
-## Full User Journey
+## 🗺️ Full User Journey
 
 ```
 Landing Page (/)
     │
     ▼
-AI Advisor (/advisor)         ← [AI Smart Fill — optional Gemini]
-    │   6-step wizard
-    │   Local recommendation engine runs
-    │   [Explain with Gemini AI — optional]
+AI Advisor (/advisor)         ← [6-Step Discovery / Presets / Zero-Hallucination Engine]
+    │   Step 1: Business type (Retail, Clinic, Restaurant, Factory, Office…)
+    │   Step 2: Employee headcount & operational sites
+    │   Step 3: Location city & market tier (Tier-1 Metro / Tier-2 Emerging)
+    │   Step 4: Connectivity bandwidth & SLA requirement
+    │   Step 5: Essential digital tools (POS, CCTV, Wi-Fi, Cloud Backup, Security)
+    │   Step 6: Communication channels (Postpaid SIMs, SIP IVR, WhatsApp API, SMS)
+    │   [Optional Gemini AI natural language explanation]
     │
     ▼
 Quote Studio (/quote)
-    │   Bundle pre-loaded from advisor
-    │   Customer adjusts items & contract term
-    │   Live GST-aware pricing
+    │   Bundle pre-loaded from advisor via localStorage
+    │   Customer adjusts quantities & add-ons (mandatory core items locked)
+    │   Contract commitment selector (10% discount for 12 mo / 15% for 24 mo)
+    │   Live GST-aware arithmetic (18% input credit eligible)
+    │   Saves quote to database (SavedQuote model)
     │
     ▼
 Smart KYC (/kyc)
-    │   Privacy consent (DOT-compliant)
-    │   Document upload / specimen selection
-    │   Local OCR extraction (Tesseract.js)
-    │   Cross-registry verification (GSTIN + Udyam + Address proof)
+    │   DOT-compliant privacy & affirmative consent notice (Notice v2.1-2026)
+    │   12-specimen dossier explorer (K01–K12) or file upload
+    │   Local OCR extraction (Tesseract.js) with client-side field review
+    │   Tri-registry validation (Mock GSTIN + Mock Udyam + 90-day address proof)
+    │   Automated exception triaging: Verified / Manual Review / Rejected
     │
     ▼
 Order Tracker (/tracker)
-    │   7-stage pipeline visualization
-    │   Live status updates
+    │   Persistent Order ID (ORD-YYYYMM-XXXX)
+    │   7-stage real-time progress pipeline
+    │   Assigned field engineer dispatch & feasibility clearance
+    │   Interactive demo simulator button to advance lifecycle live
     │
     ▼
-    🎉 Service Activated
+    🎉 Service Activated (<5 Days SLA)
 ```
 
 ---
 
-## Tech Stack
+## 📸 Product Walkthrough & Interface Gallery
 
-| Layer | Technology |
-|:---|:---|
-| **Framework** | Next.js 16.4.5 (App Router, Turbopack) |
-| **Language** | TypeScript 5 |
-| **Styling** | Tailwind CSS 4 |
-| **Database ORM** | Prisma 5.22 (SQLite for local dev) |
-| **Icons** | Lucide React |
-| **Charts** | Recharts |
-| **OCR** | Tesseract.js (runs locally, no cloud) |
-| **AI (optional)** | Google Gemini 2.5 Flash via `@google/genai` |
-| **Testing** | Custom assertion suite via `tsx` |
+Screenshots of the complete digital journey captured directly from the live application:
+
+### 1. 🤖 AI Business Advisor — `/advisor`
+
+A guided 6-step questionnaire that matches exact catalogue items using our deterministic engine with optional Gemini AI explanation.
+
+| Step 1: Business Profile Selection | Step 2: Scale & Employee Count |
+| :---: | :---: |
+| ![Advisor Step 1](assets/image%20copy%204.png) | ![Advisor Step 2](assets/image%20copy%205.png) |
+| *Adaptive Question 1: Industry Category* | *Adaptive Question 2: Employee Count & Operational Sites* |
+
+| Step 3: Location & City Tier | Step 4: Bandwidth & Uptime Need |
+| :---: | :---: |
+| ![Advisor Step 3](assets/image%20copy%206.png) | ![Advisor Step 4](assets/image%20copy%207.png) |
+| *City Location, Market Tier & Tax Registrations* | *Connectivity Speed, Leased Line SLA & 5G AirFiber* |
+
+| Step 5: Essential Digital Tools | Step 6: Customer Communication |
+| :---: | :---: |
+| ![Advisor Step 5](assets/image%20copy%208.png) | ![Advisor Step 6](assets/image%20copy%203.png) |
+| *Cloud POS, CCTV, Managed Wi-Fi & Backup* | *Postpaid CUG, Cloud Telephony IVR & WhatsApp API* |
+
+<div align="center">
+
+#### 🎯 Generated Bundle Recommendation Screen
+![Bundle Recommendation Result](assets/image%20copy%209.png)  
+*Figure 3: Deterministic Product Recommendation with Zero-Hallucination Pricing, Add-ons & Sector Rationale*
+
+</div>
 
 ---
 
-## Project Structure
+### 2. 📋 Quote Studio & Commercial Checkout — `/quote`
+
+Live interactive commercial configuration with line-item management, add-on toggles, and live price recalculation.
+
+<div align="center">
+
+![Quote & Commercial Checkout](assets/image%20copy%2010.png)  
+*Figure 4: Commercial Summary, Add-on Toggles, Line-item Breakdown & GST Input Credit*
+
+</div>
+
+**Key capabilities:**
+- **Auto-loads** the bundle from the Advisor via `localStorage`.
+- **Customer & service location fields** — Business name, contact, mobile, city, state, PIN code.
+- **Dependency protection** — Mandatory core products cannot be removed while retaining dependent services.
+- **Real-time totals** — Subtotal, commitment discount, 18% GST, one-time setup, and net monthly bill.
+
+---
+
+### 3. 🛡️ Smart Digital KYC & Registry Verification — `/kyc`
+
+Paperless 4-step verification engine with unbundled affirmative consent, OCR review, and synthetic registry validation.
+
+<div align="center">
+
+![Smart KYC Registry Verification](assets/image%20copy%2011.png)  
+*Figure 5: KYC Verification Outcome — Registry Cross-Matching, Status Validation & Exception Handling*
+
+</div>
+
+**Validation checks:**
+- **GST Portal Match** (`GstinRecord` table, 3,534 records) — Validates 15-char format, Active status, and trade name.
+- **Udyam MSME Match** (`UdyamRecord` table, 2,723 records) — Validates enterprise type and NIC activity.
+- **Address Proof Recency** — Rejects utility bills older than 90 days from July 15, 2026.
+- **Exception Scenarios** — Automatically detects expired bills (K08), signatory mismatches (K10), and suspended GSTINs (K11).
+
+---
+
+### 4. 📦 Live Order Milestone Tracker — `/tracker`
+
+Real-time visibility from order submission to optical fiber termination and service activation.
+
+<div align="center">
+
+![Order Milestone Tracker](assets/image%20copy%2012.png)  
+*Figure 6: Real-time 7-Stage Milestone Progression, Dispatch Details & Audit Trail*
+
+</div>
+
+**7-Stage Pipeline:**
+1. Application Received → 2. KYC Processing → 3. KYC Verified → 4. Order Confirmed → 5. Installation Scheduled → 6. Installation in Progress → 7. **Activated** ✅
+
+---
+
+### 5. 📊 MSME Intelligence Dashboard & Partner Portal (`/admin` & `/partner`)
+
+Macro analytics over 5,000 SMB leads and distributor referral management.
+
+| Admin Funnel & Drop-off Intelligence | Channel Efficiency Analytics |
+| :---: | :---: |
+| ![Admin Funnel Analytics](assets/image%20copy%2013.png) | ![Channel Efficiency](assets/image%20copy%2014.png) |
+| *Funnel Progression, 6-Month Churn & Drop Bottlenecks* | *Referral, Inbound, Field & Partner Acquisition Cost / Conversion* |
+
+<div align="center">
+
+#### 🤝 Channel Partner & Field Force Portal
+![Channel Partner Portal](assets/image%20copy%2015.png)  
+*Figure 7: Partner Referral Submission, Assisted Onboarding Queue & Commission Payouts*
+
+</div>
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology | Purpose |
+|:---|:---|:---|
+| **Framework** | Next.js 16.4.5 (App Router, Turbopack) | Modern full-stack React framework with SSR and server routes |
+| **Language** | TypeScript 5 | Strict end-to-end type safety |
+| **Styling** | Tailwind CSS 4 | Utility-first responsive design in enterprise telecom theme |
+| **Database & ORM** | Prisma 5.22 + SQLite | Local transactional database with full schema typing |
+| **Icons** | Lucide React | High-clarity SVG icon library |
+| **Charts** | Recharts | Dynamic funnel charts, bar graphs, and segment metrics |
+| **OCR Engine** | Tesseract.js | Client & server optical character recognition without external APIs |
+| **Conversational AI** | Google Gemini 2.5 Flash via `@google/genai` | Natural language business rationales (with offline fallback) |
+| **Testing** | Custom assertion test suite via `tsx` | 12 automated unit tests across recommendations, KYC & formats |
+
+---
+
+## 📁 Project Structure
 
 ```
 udyam-digital/
+├── assets/                    # System architecture flowchart + UI screenshots
+│   ├── flowchart.png          # System Architecture & Flowchart diagram
+│   └── image *.png            # Captured application UI walkthrough images
 ├── prisma/
-│   ├── schema.prisma          # Database models
-│   ├── seed.ts                # Seed 5,000 MSME leads + product catalogue
-│   └── dev.db                 # SQLite database
+│   ├── schema.prisma          # Database models (Products, Leads, Registries, Orders, Quotes)
+│   ├── seed.ts                # Database seed script for 5,000 leads, 25 products & registries
+│   └── dev.db                 # Local SQLite database
 ├── src/
 │   ├── app/
-│   │   ├── page.tsx           # Landing page
+│   │   ├── page.tsx           # Digital landing page (Bilingual EN/HI)
 │   │   ├── advisor/           # AI Business Advisor wizard
-│   │   ├── quote/             # Quote Studio
-│   │   ├── kyc/               # Smart Digital KYC
-│   │   ├── tracker/           # Order Tracker
-│   │   ├── partner/           # Partner Portal
-│   │   ├── admin/             # Analytics Dashboard
+│   │   ├── quote/             # Quote Studio & commercial checkout
+│   │   ├── kyc/               # Smart Digital KYC verification
+│   │   ├── tracker/           # Live Order Milestone Tracker
+│   │   ├── partner/           # Channel Partner & Sales Portal
+│   │   ├── admin/             # MSME Intelligence Dashboard
 │   │   └── api/
-│   │       ├── advisor/       # POST: Recommendation engine + optional AI
-│   │       ├── quotes/        # POST: Save quote to DB
-│   │       ├── orders/        # GET/POST: Order management
+│   │       ├── advisor/       # POST: Deterministic recommendation engine + optional AI
+│   │       ├── quotes/        # GET/POST: Quote persistence
+│   │       ├── orders/        # GET/POST/PATCH: Order lifecycle management
 │   │       ├── kyc/
 │   │       │   ├── ocr/       # POST: Document OCR extraction
 │   │       │   └── verify/    # POST: Cross-registry KYC verification
-│   │       └── analytics/     # GET: Aggregated MSME lead insights
+│   │       └── analytics/     # GET: Aggregated 5,000 lead funnel insights
 │   └── lib/
 │       ├── recommendation-engine.ts  # Deterministic bundle algorithm
-│       ├── kyc-verification.ts       # GSTIN / Udyam / address-proof logic
-│       ├── kyc-specimens.ts          # 12 test dossier specimens
-│       ├── translations.ts           # EN / HI string table
+│       ├── kyc-verification.ts       # GSTIN / Udyam / address proof validation rules
+│       ├── kyc-specimens.ts          # K01–K12 test dossier records
+│       ├── translations.ts           # Complete EN / HI translation string table
 │       └── prisma.ts                 # Prisma client singleton
 ├── tests/
 │   └── unit-test.ts           # 12 automated assertions
 ├── .env                       # Environment variables (gitignored)
 └── .vscode/
-    └── settings.json          # Hides .next from explorer sidebar
+    └── settings.json          # Workspace configuration
 ```
 
 ---
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
@@ -347,22 +285,22 @@ udyam-digital/
 # 1. Install dependencies
 npm install
 
-# 2. Generate Prisma client and seed the database
+# 2. Push database schema & seed from synthetic CSVs
 npx prisma generate
 npx prisma db push
 npx tsx prisma/seed.ts
 
-# 3. Configure environment (optional — app works without it)
-# Edit .env and add your free Gemini API key from https://aistudio.google.com/
+# 3. Configure environment (optional — app runs 100% offline without key)
+# Add your Gemini API key from https://aistudio.google.com/ to .env
 GEMINI_API_KEY=AIzaSy...
 
 # 4. Start the development server
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### Run Tests
+### Run Automated Tests
 
 ```bash
 npm test
@@ -371,55 +309,39 @@ npm test
 
 ---
 
-## Environment Variables
+## 🔑 Environment Variables
 
-A single `.env` file at the project root (gitignored):
+A single `.env` file at the project root:
 
 ```env
 DATABASE_URL="file:./prisma/dev.db"
 
-# Optional — enables AI Smart Fill and AI Explanation features
-# Get a free key at: https://aistudio.google.com/
+# Optional — enables Gemini AI explanation enhancements
+# App operates with complete deterministic fallback when empty
 GEMINI_API_KEY=
 ```
 
-> The application runs fully with **no API key**. Gemini is used only when explicitly requested by the user via UI buttons.
+---
+
+## 🌐 Complete Bilingual Support
+
+Every page supports full **English / हिन्दी** localization via the header toggle. All UI text, error banners, button labels, stage descriptions, and product rationale strings are translated.
 
 ---
 
-## Deployment
+## 📋 KYC Compliance & Regulatory Notes
 
-### Vercel (Recommended)
-
-```bash
-vercel deploy
-```
-
-Add `GEMINI_API_KEY` in Vercel → Project Settings → Environment Variables.
-
-> **Note:** The SQLite database (`dev.db`) is a local file. For production, migrate the `DATABASE_URL` to a hosted PostgreSQL instance (e.g., Neon, Supabase, Prisma Postgres) and update the `datasource` provider in `prisma/schema.prisma`.
-
----
-
-## Bilingual Support
-
-Every page supports full **English / हिन्दी** switching. The language state is maintained per-page session via React state. All UI text, error messages, button labels, stage descriptions, and product rationale strings are translated.
-
----
-
-## KYC Compliance Notes
-
-The KYC flow is designed to mirror real Indian telecom regulatory requirements:
-- **DOT CAF (Customer Acquisition Form)** fields captured: Business name, GSTIN, Udyam, Signatory details, Address proof.
-- **Consent framework** follows India's Digital Personal Data Protection Act (DPDPA) 2023 principle of **purpose limitation** and **granular consent**.
-- Marketing consent is explicitly **opt-in only** and separate from mandatory operational consents.
-- Failed/inactive KYC records are tagged for 90-day automatic purge.
+The KYC flow is engineered to align with Indian telecom regulatory expectations:
+- **DOT CAF (Customer Acquisition Form)** attributes captured: Legal Name, GSTIN, Udyam Number, Signatory Details, Address Proof.
+- **Granular Consent Architecture:** Purpose-specific, un-preselected affirmative consent for identity verification, document OCR, and telecom fulfillment.
+- **Address Proof Validity:** Automatic age calculation rejecting bills older than 90 days from the baseline date (July 15, 2026).
+- **Automated Exception Handling:** Mismatched names, unverified numbers, and suspended tax registrations are automatically quarantined for manual review.
 
 ---
 
 <div align="center">
 
-Built for the **Airtel Accel Business Hackathon 2026**
+Built for the **Accel YTL Hackathon (Track A: Project Udyam Digital)**
 
 *Connecting 63 million Indian MSMEs to enterprise-grade digital infrastructure — one bundle at a time.*
 

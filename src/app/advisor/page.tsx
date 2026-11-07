@@ -33,6 +33,11 @@ function AdvisorContent() {
   const [loading, setLoading] = useState(false);
   const [recommendation, setRecommendation] = useState<RecommendedBundle | null>(null);
   const [aiExplanation, setAiExplanation] = useState<string>('');
+  const [isAiExplanation, setIsAiExplanation] = useState(false);
+  const [loadingAiExplanation, setLoadingAiExplanation] = useState(false);
+  const [unconventionalText, setUnconventionalText] = useState('');
+  const [parsingUnconventional, setParsingUnconventional] = useState(false);
+  const [unconventionalFeedback, setUnconventionalFeedback] = useState<string | null>(null);
 
   // Form State
   const [requirements, setRequirements] = useState<BusinessRequirements>({
@@ -152,22 +157,85 @@ function AdvisorContent() {
 
   const generateBundle = async () => {
     setLoading(true);
+    setIsAiExplanation(false);
     try {
       const res = await fetch('/api/advisor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requirements),
+        body: JSON.stringify({
+          ...requirements,
+          explainWithAi: false, // Purely local recommendation by default
+        }),
       });
       const data = await res.json();
       if (data.success) {
         setRecommendation(data.bundle);
         setAiExplanation(data.aiExplanation);
+        setIsAiExplanation(Boolean(data.isAiGenerated));
         setStep(7); // Show recommendation view
       }
     } catch (err) {
       console.error('Failed to generate bundle:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const requestAiExplanation = async () => {
+    if (!recommendation) return;
+    setLoadingAiExplanation(true);
+    try {
+      const res = await fetch('/api/advisor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...requirements,
+          explainWithAi: true, // Specifically opt-in to AI explanation
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.aiExplanation) {
+        setAiExplanation(data.aiExplanation);
+        setIsAiExplanation(Boolean(data.isAiGenerated));
+      }
+    } catch (err) {
+      console.error('Failed to get AI explanation:', err);
+    } finally {
+      setLoadingAiExplanation(false);
+    }
+  };
+
+  const parseUnconventionalInput = async () => {
+    if (!unconventionalText.trim()) return;
+    setParsingUnconventional(true);
+    setUnconventionalFeedback(null);
+    try {
+      const res = await fetch('/api/advisor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          unconventionalPrompt: unconventionalText,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.parsedRequirements) {
+        setRequirements(prev => ({
+          ...prev,
+          ...data.parsedRequirements,
+        }));
+        setUnconventionalFeedback(
+          lang === 'hi'
+            ? '✓ AI ने आपकी आवश्यकताओं को पहचानकर फॉर्म भर दिया है!'
+            : '✓ Requirements recognized & filled by AI!'
+        );
+      } else {
+        setUnconventionalFeedback(data.error || 'Could not parse with AI. Ensure GEMINI_API_KEY is configured.');
+      }
+    } catch (err) {
+      console.error('Error parsing input with AI:', err);
+      setUnconventionalFeedback('Network error or API key missing.');
+    } finally {
+      setParsingUnconventional(false);
     }
   };
 
@@ -351,6 +419,58 @@ function AdvisorContent() {
                       ? 'हम आपके उद्योग के अनुसार आवश्यक कनेक्टिविटी स्पीड और डिजिटल टूल्स तैयार करते हैं।'
                       : 'We customize network SLAs and product combinations based on your industry.'}
                   </p>
+                </div>
+
+                {/* Optional Unconventional / AI Free-text input */}
+                <div className="bg-slate-50 border border-dashed border-slate-300 rounded-2xl p-4 sm:p-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-rose-500" />
+                      {lang === 'hi' ? 'वैकल्पिक: अपनी भाषा में बताएं (AI स्मार्ट-फिल)' : 'Optional: Describe in your own words (AI Smart Fill)'}
+                    </span>
+                    <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-400 bg-white border border-slate-200 px-2 py-0.5 rounded-full">
+                      Gemini AI
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mb-3">
+                    {lang === 'hi'
+                      ? 'यदि आप फॉर्म नहीं भरना चाहते, तो अपने व्यवसाय और जरूरतों को संक्षेप में लिखें।'
+                      : 'Skip the manual steps if you prefer — describe your setup and let AI auto-fill the requirements.'}
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="text"
+                      value={unconventionalText}
+                      onChange={(e) => setUnconventionalText(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && parseUnconventionalInput()}
+                      placeholder={lang === 'hi' ? 'उदा: 2-मंजिला डायग्नोस्टिक लैब, 10 कर्मचारी, सीसीटीवी और फास्ट वाईफाई चाहिए' : 'e.g. 2-floor diagnostic lab in Lucknow, 10 staff, need CCTV, fast Wi-Fi and WhatsApp billing'}
+                      className="flex-1 text-xs sm:text-sm border border-slate-200 rounded-xl px-3.5 py-2.5 bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:border-rose-500 transition"
+                    />
+                    <button
+                      type="button"
+                      onClick={parseUnconventionalInput}
+                      disabled={parsingUnconventional || !unconventionalText.trim()}
+                      className="px-4 py-2.5 bg-slate-900 text-white text-xs font-bold rounded-xl hover:bg-slate-800 disabled:opacity-50 transition flex items-center justify-center gap-1.5 shrink-0"
+                    >
+                      {parsingUnconventional ? (
+                        <>
+                          <RotateCcw className="w-3.5 h-3.5 animate-spin text-rose-400" />
+                          <span>{lang === 'hi' ? 'पहचान रहा है...' : 'Analyzing...'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-3.5 h-3.5 text-rose-400" />
+                          <span>{lang === 'hi' ? 'AI से भरें' : 'Auto-fill'}</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  {unconventionalFeedback && (
+                    <div className="mt-2.5 text-xs font-medium text-rose-600 flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                      <span>{unconventionalFeedback}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -713,9 +833,42 @@ function AdvisorContent() {
 
               {/* Rationale Box */}
               <div className="mt-6 bg-slate-50 border border-slate-200/80 rounded-2xl p-5 text-sm leading-relaxed text-slate-700">
-                <div className="flex items-center gap-2 font-bold text-slate-900 mb-2">
-                  <Info className="w-4 h-4 text-rose-600" />
-                  <span>{lang === 'hi' ? `${requirements.businessType} के लिए रणनीतिक लाभ` : `Strategic Rationale for ${requirements.businessType}`}</span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
+                  <div className="flex items-center gap-2 font-bold text-slate-900">
+                    <Info className="w-4 h-4 text-rose-600" />
+                    <span>{lang === 'hi' ? `${requirements.businessType} के लिए रणनीतिक लाभ` : `Strategic Rationale for ${requirements.businessType}`}</span>
+                    {isAiExplanation ? (
+                      <span className="text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <Sparkles className="w-2.5 h-2.5" />
+                        Gemini AI
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded-full">
+                        Local Engine
+                      </span>
+                    )}
+                  </div>
+
+                  {!isAiExplanation && (
+                    <button
+                      type="button"
+                      onClick={requestAiExplanation}
+                      disabled={loadingAiExplanation}
+                      className="self-start sm:self-auto inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-white hover:bg-rose-50 border border-rose-200 text-rose-700 rounded-xl transition shadow-2xs hover:border-rose-300 disabled:opacity-50"
+                    >
+                      {loadingAiExplanation ? (
+                        <>
+                          <RotateCcw className="w-3.5 h-3.5 animate-spin text-rose-600" />
+                          <span>{lang === 'hi' ? 'AI विश्लेषण जारी है...' : 'Generating AI Pitch...'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-3.5 h-3.5 text-rose-600" />
+                          <span>{lang === 'hi' ? 'विस्तृत AI विवरण प्राप्त करें' : 'Explain with Gemini AI'}</span>
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
                 <p className="whitespace-pre-line text-xs sm:text-sm text-slate-600">{aiExplanation}</p>
               </div>

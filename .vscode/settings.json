@@ -1,0 +1,10 @@
+{
+  "files.exclude": {
+    "**/.git": true,
+    "**/.next": true,
+    "**/.agents": true,
+    "**/.claude": true,
+    "**/.windsurf": true
+  }
+}
+
